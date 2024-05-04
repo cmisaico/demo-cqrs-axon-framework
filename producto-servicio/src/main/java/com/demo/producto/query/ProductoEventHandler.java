@@ -1,13 +1,15 @@
 package com.demo.producto.query;
 
-import com.demo.producto.entity.ProductoEntity;
-import com.demo.producto.evento.ProductoCreadoEvento;
+import com.demo.producto.core.data.ProductoEntity;
+import com.demo.producto.core.evento.ProductoCreadoEvento;
 import com.demo.producto.repository.ProductoRepository;
+import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
 @Component
+@ProcessingGroup("producto-group")
 public class ProductoEventHandler {
 
     private final ProductoRepository productoRepository;

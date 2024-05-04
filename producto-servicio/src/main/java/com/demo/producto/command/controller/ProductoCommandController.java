@@ -1,7 +1,8 @@
-package com.demo.producto.controller;
+package com.demo.producto.command.controller;
 
 import com.demo.producto.command.CreaProductoComando;
-import com.demo.producto.models.dto.CreaProductoRestModelo;
+import com.demo.producto.core.data.dto.CreaProductoRestModelo;
+import jakarta.validation.Valid;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.*;
@@ -10,18 +11,18 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/producto")
-public class ProductoController {
+public class ProductoCommandController {
 
     private Environment env;
     private final CommandGateway commandGateway;
 
-    public ProductoController(Environment env, CommandGateway commandGateway) {
+    public ProductoCommandController(Environment env, CommandGateway commandGateway) {
         this.env = env;
         this.commandGateway = commandGateway;
     }
 
     @PostMapping
-    public String crearProducto(@RequestBody CreaProductoRestModelo creaProductoRestModelo) {
+    public String crearProducto(@Valid @RequestBody CreaProductoRestModelo creaProductoRestModelo) {
         CreaProductoComando creaProductoComando = CreaProductoComando.builder()
                 .productoId(UUID.randomUUID().toString())
                 .titulo(creaProductoRestModelo.getTitulo())

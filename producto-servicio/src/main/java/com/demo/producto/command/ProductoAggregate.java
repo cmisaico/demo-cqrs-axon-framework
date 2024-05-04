@@ -1,7 +1,7 @@
 package com.demo.producto.command;
 
 
-import com.demo.producto.evento.ProductoCreadoEvento;
+import com.demo.producto.core.evento.ProductoCreadoEvento;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
