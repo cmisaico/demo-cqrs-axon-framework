@@ -1,7 +1,9 @@
 package com.demo.producto;
 
 import com.demo.producto.command.interceptor.CreaProductoCommandInterceptor;
+import com.demo.producto.core.errorhandling.ProductoEventsErrorHandler;
 import org.axonframework.commandhandling.CommandBus;
+import org.axonframework.config.EventProcessingConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,4 +22,11 @@ public class ProductoServicioApplication {
 	public void registrarCreaProductoCommandInterceptor(ApplicationContext context, CommandBus commandBus){
 		commandBus.registerDispatchInterceptor(context.getBean(CreaProductoCommandInterceptor.class));
 	}
+
+	@Autowired
+	public void configure(EventProcessingConfigurer config){
+		config.registerListenerInvocationErrorHandler("producto-group",
+				conf -> new ProductoEventsErrorHandler());
+	}
+
 }
