@@ -10,7 +10,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
 @Component
-@ProcessingGroup("producto-group")
+@ProcessingGroup("producto-grupo")
 public class ProductoEventHandler {
 
     private final ProductoRepository productoRepository;
