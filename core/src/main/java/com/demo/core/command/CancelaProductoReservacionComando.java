@@ -6,11 +6,11 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
 @Data
 @Builder
-public class ReservadoProductoComando {
-
+public class CancelaProductoReservacionComando {
     @TargetAggregateIdentifier
     private final String productoId;
     private final String ordenId;
     private final String userId;
     private final int cantidad;
+    private final String razon;
 }

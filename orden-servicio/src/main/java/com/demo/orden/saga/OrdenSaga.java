@@ -1,12 +1,17 @@
 package com.demo.orden.saga;
 
-import com.demo.core.command.ReservadoProductoComando;
+import com.demo.core.command.ProcesoPagoComando;
+import com.demo.core.command.ReservaProductoComando;
+import com.demo.core.evento.PagoProcesadoEvento;
 import com.demo.core.evento.ProductoReservadoEvento;
 import com.demo.core.model.Usuario;
 import com.demo.core.query.FetchUsuarioPagoDetalleQuery;
+import com.demo.orden.command.commands.ApruebaOrdenComando;
+import com.demo.orden.core.evento.OrdenAprobadoEvento;
 import com.demo.orden.core.evento.OrdenCreadoEvento;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.messaging.responsetypes.ResponseTypes;
+import org.axonframework.modelling.saga.EndSaga;
 import org.axonframework.modelling.saga.SagaEventHandler;
 import org.axonframework.modelling.saga.StartSaga;
 import org.axonframework.queryhandling.QueryGateway;
@@ -16,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Saga
 public class OrdenSaga {
@@ -31,7 +38,7 @@ public class OrdenSaga {
     @StartSaga
     @SagaEventHandler(associationProperty = "ordenId")
     public void handle(OrdenCreadoEvento ordenCreadoEvento){
-        ReservadoProductoComando reservadoProductoComando = ReservadoProductoComando.builder()
+        ReservaProductoComando reservadoProductoComando = ReservaProductoComando.builder()
                 .productoId(ordenCreadoEvento.getProductoId())
                 .ordenId(ordenCreadoEvento.getOrdenId())
                 .cantidad(ordenCreadoEvento.getCantidad())
@@ -65,5 +72,34 @@ public class OrdenSaga {
             return;
         }
         LOGGER.info("Exito al obtener usuarioPagoDetalles para usuario " + usuarioPagoDetalles.getPrimerNombre());
+
+        ProcesoPagoComando procesoPagoComando = ProcesoPagoComando.builder()
+                .ordenId(productoReservadoEvento.getOrdenId())
+                .pagoDetalle(usuarioPagoDetalles.getPagoDetalle())
+                .pagoId(UUID.randomUUID().toString())
+                .build();
+        String resultado = null;
+        try {
+            resultado = commandGateway.sendAndWait(procesoPagoComando, 10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+        }
+
+        if(resultado == null){
+            LOGGER.info("El proceso d epago ha devuelto un resultado nulo. Iniciando compensacion");
+        }
+    }
+
+    @SagaEventHandler(associationProperty = "ordenId")
+    public void handle(@Nonnull PagoProcesadoEvento evento){
+        ApruebaOrdenComando aprobadoOrdenComando =
+                new ApruebaOrdenComando(evento.getOrdenId());
+        commandGateway.send(aprobadoOrdenComando);
+    }
+
+    @EndSaga
+    @SagaEventHandler(associationProperty = "ordenId")
+    public void handle(OrdenAprobadoEvento ordenAprobadoEvento){
+        LOGGER.info("Orden esta aprobado para ordenId: {}", ordenAprobadoEvento.getOrdenId());
     }
 }
