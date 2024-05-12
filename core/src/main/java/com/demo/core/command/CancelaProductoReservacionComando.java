@@ -10,7 +10,7 @@ public class CancelaProductoReservacionComando {
     @TargetAggregateIdentifier
     private final String productoId;
     private final String ordenId;
-    private final String userId;
+    private final String usuarioId;
     private final int cantidad;
     private final String razon;
 }

@@ -2,8 +2,10 @@ package com.demo.orden.command;
 
 import com.demo.orden.command.commands.ApruebaOrdenComando;
 import com.demo.orden.command.commands.CreaOrdenComando;
+import com.demo.orden.command.commands.RechazaOrdenComando;
 import com.demo.orden.core.evento.OrdenAprobadoEvento;
 import com.demo.orden.core.evento.OrdenCreadoEvento;
+import com.demo.orden.core.evento.OrdenRechazadoEvento;
 import com.demo.orden.core.model.OrdenEstado;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -51,6 +53,18 @@ public class OrdenAggregate {
 
     @EventSourcingHandler
     protected void on(OrdenAprobadoEvento evento) {
+        this.ordenEstado = evento.getOrdenEstado();
+    }
+
+    @CommandHandler
+    public void handle(RechazaOrdenComando comando) {
+        OrdenRechazadoEvento evento = new OrdenRechazadoEvento(comando.getOrdenId(),
+                comando.getRazon());
+        AggregateLifecycle.apply(evento);
+    }
+
+    @EventSourcingHandler
+    public void on(OrdenRechazadoEvento evento) {
         this.ordenEstado = evento.getOrdenEstado();
     }
 }

@@ -1,7 +1,9 @@
 package com.demo.producto.command;
 
 
-import com.demo.core.command.ReservadoProductoComando;
+import com.demo.core.command.CancelaProductoReservacionComando;
+import com.demo.core.command.ReservaProductoComando;
+import com.demo.core.evento.ProductoReservacionCanceladoEvento;
 import com.demo.core.evento.ProductoReservadoEvento;
 import com.demo.producto.core.evento.ProductoCreadoEvento;
 import org.axonframework.commandhandling.CommandHandler;
@@ -41,7 +43,7 @@ public class ProductoAggregate {
     }
 
     @CommandHandler
-    public void handle(ReservadoProductoComando comando){
+    public void handle(ReservaProductoComando comando){
         if(cantidad < comando.getCantidad()){
             throw new IllegalArgumentException("No hay suficiente stock para el producto");
         }
@@ -57,11 +59,28 @@ public class ProductoAggregate {
     }
 
     @EventSourcingHandler
+    public void on(ProductoReservacionCanceladoEvento evento){
+        this.cantidad += evento.getCantidad();
+    }
+
+    @EventSourcingHandler
     public void on(ProductoCreadoEvento evento){
         this.productoId = evento.getProductoId();
         this.titulo = evento.getTitulo();
         this.precio = evento.getPrecio();
         this.cantidad = evento.getCantidad();
+    }
+
+    @CommandHandler
+    public void handle(CancelaProductoReservacionComando comando){
+        ProductoReservacionCanceladoEvento evento = ProductoReservacionCanceladoEvento.builder()
+                .ordenId(comando.getOrdenId())
+                .productoId(comando.getProductoId())
+                .cantidad(comando.getCantidad())
+                .razon(comando.getRazon())
+                .usuarioId(comando.getUsuarioId())
+                .build();
+        AggregateLifecycle.apply(evento);
     }
 
     @EventSourcingHandler

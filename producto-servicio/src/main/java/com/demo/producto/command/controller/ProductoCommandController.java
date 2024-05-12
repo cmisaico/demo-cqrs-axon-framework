@@ -31,11 +31,11 @@ public class ProductoCommandController {
                 .build();
         String valorRetorno;
 
-        try {
+//        try {
             valorRetorno = commandGateway.sendAndWait(creaProductoComando);
-        } catch(Exception ex){
-            valorRetorno = ex.getLocalizedMessage();
-        }
+//        } catch(Exception ex){
+//            valorRetorno = ex.getLocalizedMessage();
+//        }
         return valorRetorno;
     }
 

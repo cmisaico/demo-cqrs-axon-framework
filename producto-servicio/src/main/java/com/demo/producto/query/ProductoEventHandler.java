@@ -1,5 +1,6 @@
 package com.demo.producto.query;
 
+import com.demo.core.evento.ProductoReservacionCanceladoEvento;
 import com.demo.core.evento.ProductoReservadoEvento;
 import com.demo.producto.core.data.ProductoEntity;
 import com.demo.producto.core.evento.ProductoCreadoEvento;
@@ -48,9 +49,20 @@ public class ProductoEventHandler {
     @EventHandler
     public void on(ProductoReservadoEvento evento){
         ProductoEntity productoEntity = productoRepository.findByProductoId(evento.getProductoId());
+
+        LOGGER.debug("ProductoReservadoEvento recibido para productoId: {} y ordenId: {}", evento.getProductoId(), evento.getOrdenId());
+
         productoEntity.setCantidad(productoEntity.getCantidad() - evento.getCantidad());
         productoRepository.save(productoEntity);
-
+        LOGGER.debug("ProductoReservadoEvento: Nuevo Producto cantidad " + productoEntity.getCantidad() + " para productoId: " + evento.getProductoId() + " y ordenId: " + evento.getOrdenId());
         LOGGER.info("ProductoReservadoEvento recibido para productoId: {} y ordenId: {}", evento.getProductoId(), evento.getOrdenId());
+    }
+
+    @EventHandler
+    public void on(ProductoReservacionCanceladoEvento evento){
+        ProductoEntity productoEntity = productoRepository.findByProductoId(evento.getProductoId());
+        int nuevaCantidad = productoEntity.getCantidad() + evento.getCantidad();
+        productoEntity.setCantidad(nuevaCantidad);
+        productoRepository.save(productoEntity);
     }
 }
